@@ -1,0 +1,53 @@
+{
+    "icon": "string",
+    "isPublished": true,
+    "languages": [
+      {
+        "lang": "EN",
+        "name": "About blockchain and cryptocurrency",
+        "about": "Completed the course and get nft that will help you with energy in the metaverse."
+      }
+    ],
+    "lessons": [
+      {
+        "languages": [
+          {
+            "lang": "EN",
+            "name": "Lesson name",
+            "description": "Completed the course and get nft that will help you with energy inthe metaverse."
+          }
+        ],
+        "slides": [
+          {
+            "lang": "EN",
+            "content": "Slide 1 content "
+          },
+          {
+            "lang": "EN",
+            "content": "Slide 2 content "
+          },
+          {
+            "lang": "EN",
+            "content": "Slide 3 content "
+          },
+          {
+            "lang": "EN",
+            "content": "Slide 4 content "
+          },
+          {
+            "lang": "EN",
+            "content": "Slide 5 content "
+          },
+          {
+            "lang": "EN",
+            "content": "Slide 6 content "
+          },
+          {
+            "lang": "EN",
+            "content": "Slide 7 content "
+          }
+        ],
+        "isPublished": true
+      }
+    ]
+  }
