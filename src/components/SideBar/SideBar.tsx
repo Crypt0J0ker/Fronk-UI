@@ -1,23 +1,23 @@
-import React, { useState, useEffect } from "react";
-import { ethers } from "ethers";
-import Image from "next/image";
-import imgSrcLogo from "../../../public/images/fronk/Logo_small.png";
-import imgSrcAvatar from "../../../public/images/fronk/Avatar.png";
-import DiscordIcon from "@/components/icons/discordIcon";
-import TwitterIcon from "@/components/icons/twitterIcon";
-import InstagramIcon from "@/components/icons/instagramIcon";
-import { useAccount, useDisconnect } from "wagmi";
-import { useAuth } from "@/hook/useAuth";
-import { useTranslation } from "react-i18next";
-import Link from "next/link";
-import { IUser } from "@/interfaces";
-import { FronkWorldClient } from "../../../dist";
+import React, { useState, useEffect } from 'react'
+import { ethers } from 'ethers'
+import Image from 'next/image'
+import imgSrcLogo from '../../../public/images/fronk/Logo_small.png'
+import imgSrcAvatar from '../../../public/images/fronk/Avatar.png'
+import DiscordIcon from '@/components/icons/discordIcon'
+import TwitterIcon from '@/components/icons/twitterIcon'
+import InstagramIcon from '@/components/icons/instagramIcon'
+import { useAccount, useDisconnect } from 'wagmi'
+import { useAuth } from '@/hook/useAuth'
+import { useTranslation } from 'react-i18next'
+import Link from 'next/link'
+import { IUser } from '@/interfaces'
+import { FronkWorldClient } from '../../../dist'
 
 const socials = [
-  { icon: <TwitterIcon />, label: "twitter", link: "#" },
-  { icon: <InstagramIcon />, label: "instagram", link: "#" },
-  { icon: <DiscordIcon />, label: "discord", link: "#" },
-];
+  { icon: <TwitterIcon />, label: 'twitter', link: '#' },
+  { icon: <InstagramIcon />, label: 'instagram', link: '#' },
+  { icon: <DiscordIcon />, label: 'discord', link: '#' },
+]
 
 const UserInfoPanel = ({ user }: { user: IUser }) => (
   <div className="flex flex-col items-center border border-fronk-orange py-10 mb-2">
@@ -26,7 +26,7 @@ const UserInfoPanel = ({ user }: { user: IUser }) => (
     </div>
     <h1 className="mt-2.5 text-2xl">{user.name}</h1>
     <div className="w-full px-2.5">
-      {user.socials.map((item) => (
+      {user.socials.map(item => (
         <Link key={item.label} href={item.link}>
           <div className="flex justify-between items-center border border-fronk-orange mt-5 pr-5 py-2">
             <h1 className="ml-2.5 text-base">{item.name}</h1>
@@ -38,30 +38,30 @@ const UserInfoPanel = ({ user }: { user: IUser }) => (
       ))}
     </div>
   </div>
-);
+)
 
 const Popup = () => {
-  const { t }: { t: any } = useTranslation();
-  const { disconnect } = useDisconnect();
-  const { setIsLoading, setIsOpenSidebar } = useAuth();
+  const { t }: { t: any } = useTranslation()
+  const { disconnect } = useDisconnect()
+  const { setIsLoading, setIsOpenSidebar } = useAuth()
 
   function handleDisconnect() {
-    setIsLoading(true);
-    disconnect();
-    setIsOpenSidebar(false);
+    setIsLoading(true)
+    disconnect()
+    setIsOpenSidebar(false)
   }
   return (
     <>
       <input type="checkbox" id="popup" className="modal-toggle" />
       <div className="modal" role="dialog">
         <div className="modal-box text-black">
-          <p className="py-4">{t("Are you sure you want to disconnect?")}</p>
+          <p className="py-4">{t('Are you sure you want to disconnect?')}</p>
           <div className="modal-action">
             <label htmlFor="popup" className="btn">
-              {t("cancel")}
+              {t('cancel')}
             </label>
             <label htmlFor="popup" onClick={handleDisconnect} className="btn">
-              {t("disconnect")}
+              {t('disconnect')}
             </label>
           </div>
         </div>
@@ -69,22 +69,22 @@ const Popup = () => {
         <label className="modal-backdrop" htmlFor="popup"></label>
       </div>
     </>
-  );
-};
+  )
+}
 
 const WalletButton = ({ connectWallet }: { connectWallet: any }) => {
-  const { t }: { t: any } = useTranslation();
-  const [walletAdress, setWalletAdress] = useState("");
-  const { address } = useAccount();
-  const { isAuth } = useAuth();
+  const { t }: { t: any } = useTranslation()
+  const [walletAdress, setWalletAdress] = useState('')
+  const { address } = useAccount()
+  const { isAuth } = useAuth()
 
   useEffect(() => {
     if (address) {
-      const value = `${address.slice(0, 5)}...${address?.slice(-4)}`;
-      setWalletAdress(value);
+      const value = `${address.slice(0, 5)}...${address?.slice(-4)}`
+      setWalletAdress(value)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuth]);
+  }, [isAuth])
 
   if (isAuth) {
     return (
@@ -94,61 +94,66 @@ const WalletButton = ({ connectWallet }: { connectWallet: any }) => {
       >
         <p>{walletAdress}</p>
       </label>
-    );
+    )
   }
   return (
     <label
       className="bg-fronk-orange hover:bg-fronk-orange/50 text-4xl normal-case font-semibold text-white w-full py-2 my-6 flex justify-center items-center"
       onClick={() => {
-        connectWallet(true);
+        connectWallet(true)
       }}
     >
-      <p className="uppercase">{t("wallet")}</p>
+      <p className="uppercase">{t('wallet')}</p>
     </label>
-  );
-};
+  )
+}
 
 const TotalPanel = ({ children }: { children: number | string }) => {
-  const { t }: { t: any } = useTranslation();
-  const total = children.toString().split("").join(" ");
+  const { t }: { t: any } = useTranslation()
+  const total = children.toString().split('').join(' ')
 
   return (
     <div className="flex flex-col items-center px-9">
-      <h1 className="text-[1.75rem]">{t("total FXP")}</h1>
+      <h1 className="text-[1.75rem]">{t('total FXP')}</h1>
       <div className="w-full border border-fronk-green whitespace-nowrap overflow-hidden">
         <h1 className="text-fronk-green text-center tracking-widest text-[2rem] font-bold">
           {total}
         </h1>
       </div>
     </div>
-  );
-};
+  )
+}
 
 const SideBar = ({
   user,
   connectWallet,
 }: {
-  user: IUser;
-  connectWallet: any;
+  user: IUser
+  connectWallet: any
 }) => {
-  const { t }: { t: any } = useTranslation();
-  const { address } = useAccount();
-  const { isAuth } = useAuth();
+  const { t }: { t: any } = useTranslation()
+  const { address } = useAccount()
+  const { isAuth } = useAuth()
 
-  const [total, setTotal] = useState("520");
+  const [total, setTotal] = useState('520')
 
   useEffect(() => {
-    if (isAuth) {
-      // if (window.ethereum) {
-      //   const provider = new ethers.providers.Web3Provider(window.ethereum);
-      //   const signer = provider.getSigner();
-      //   const fronkWorldClient = new FronkWorldClient(signer);
-      //   fronkWorldClient
-      //     .getFronkXPBalance(address)
-      //     .then((total: string) => setTotal(total));
-      // }
+    const fetchData = async () => {
+      if (isAuth) {
+        if (window.ethereum) {
+          const provider = new ethers.providers.Web3Provider(window.ethereum)
+          const signer = provider.getSigner()
+          const address = await signer.getAddress()
+          const fronkWorldClient = new FronkWorldClient(signer)
+          fronkWorldClient
+            .getFronkXPBalance(address.toString())
+            .then((total: string) => setTotal(total))
+            .catch((err: any) => console.log(err))
+        }
+      }
     }
-  }, [address, isAuth]);
+    fetchData()
+  }, [address, isAuth])
 
   return (
     <>
@@ -172,7 +177,7 @@ const SideBar = ({
 
         <footer className="flex flex-col items-center">
           <h1 className="text-base tracking-widest font-extralight mb-3">
-            {t("all rights reserved")}
+            {t('all rights reserved')}
           </h1>
           <div className="w-full flex justify-center items-center mb-12">
             {socials.map(({ icon, label, link }) => (
@@ -184,7 +189,7 @@ const SideBar = ({
         </footer>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default SideBar;
+export default SideBar
