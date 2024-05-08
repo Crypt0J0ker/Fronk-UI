@@ -36,8 +36,8 @@ const ConnectWalletComponent: FC<{
         } duration-300`}
       >
         <div className="fixed flex flex-col justify-between w-full h-screen lg:w-[30rem] bg-gray-block">
-          <div className="flex justify-end" onClick={(e) => onClose(e)}>
-            <CloseButton />
+          <div className="flex justify-end">
+            <CloseButton size={8} handleClick={(e: any) => onClose(e)} />
           </div>
           <div className="px-6">
             <p className="hidden lg:flex my-8 text-2xl font-semibold capitalize">

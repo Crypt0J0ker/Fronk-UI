@@ -1,5 +1,5 @@
 {
-  "name": "force-academy",
+  "name": "fronk-world",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -11,6 +11,15 @@
   },
   "dependencies": {
     "@designbycode/tailwindcss-text-stroke": "^1.2.1",
+    "@ethersproject/abi": "^5.6.4",
+    "@ethersproject/abstract-provider": "^5.6.1",
+    "@ethersproject/abstract-signer": "^5.6.2",
+    "@ethersproject/bytes": "^5.6.1",
+    "@ethersproject/providers": "^5.6.8",
+    "@indexed-finance/multicall": "^2.0.0",
+    "ethers": "^5.6.9",
+    "lodash": "^4.17.21",
+    "tslib": "^2.4.0",
     "@headlessui/react": "^1.7.15",
     "@heroicons/react": "^2.0.18",
     "@types/node": "20.4.2",
@@ -19,7 +28,6 @@
     "axios": "^1.4.0",
     "eslint": "8.45.0",
     "eslint-config-next": "13.4.10",
-    "ethers": "^5.6.4",
     "i18next-browser-languagedetector": "6.1.4",
     "next": "13.4.10",
     "next-i18next": "11.0.0",

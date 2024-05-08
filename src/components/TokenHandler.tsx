@@ -17,8 +17,8 @@ const TokenHandler = () => {
   const setToken = async () => {
     try {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
-
       const signer = provider.getSigner();
+
       const token = await Web3Token.sign(
         async (msg: any) => await signer.signMessage(msg),
         `${Config.tokenExpireDays}d`
@@ -29,7 +29,6 @@ const TokenHandler = () => {
       console.log("staleTime", staleTime);
       localStorage.setItem("token", token);
       localStorage.setItem("staleTime", staleTime.getTime().toString());
-
       return token;
     } catch (error: any) {
       disconnect();

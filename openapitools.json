@@ -6,10 +6,10 @@
     "generators": {
       "v2.0": {
         "generatorName": "typescript-axios",
-        "output": "./services/gen/academyService",
+        "output": "./services/gen/fronkService",
         "inputSpec": "https://academy-dev.test.competentit.ru/bck/api-json",
         "additionalProperties": {
-          "npmName": "academyService",
+          "npmName": "fronkService",
           "npmVersion": "1.0.0",
           "snapshot": false,
           "supportsES6": true,
