@@ -135,7 +135,7 @@ const SideBar = ({
   const { address } = useAccount()
   const { isAuth } = useAuth()
 
-  const [total, setTotal] = useState('520')
+  const [total, setTotal] = useState('0.0')
 
   useEffect(() => {
     const fetchData = async () => {
