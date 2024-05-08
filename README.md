@@ -14,6 +14,15 @@ https://docs.google.com/document/d/1ooUT-8pNN8tmx0nBqihLTgiATeoUPJikTl6Xx07yJvk/
 
 # web
 
+<pre><code>
+<em>Project build:</em>
+yarn build
+  
+<em>Project start on localhost:</em>
+yarn install
+yarn dev
+</code></pre>
+
 
 
 ## Getting started
