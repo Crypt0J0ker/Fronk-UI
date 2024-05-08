@@ -7,6 +7,7 @@ import { ethers } from "ethers";
 import { FronkWorldClient } from "../../../dist";
 import CloseButton from "../CloseButton/CloseButton";
 import Config from "@/config/config";
+import { useAuth } from "@/hook/useAuth";
 
 const networks: INetWork = Config.chains;
 
@@ -19,19 +20,40 @@ function getClient() {
   return client;
 }
 
+async function isCorrectChain() {
+  let currentChainId: number;
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  await provider.getNetwork().then((chain) => {
+    currentChainId = chain.chainId;
+  });
+
+  const currentChain = Object.values(networks).find(
+    (item: any) => parseInt(item.chainId, 16) === currentChainId
+  );
+  return currentChain?.chainId;
+}
+
 const Card = ({ item, minted }: { item: number; minted: boolean }) => {
   const { t }: { t: any } = useTranslation();
+  const { isAuth } = useAuth();
   const dailyStreakStatus = minted ? "done" : `day ${item + 1}`;
-  const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState(`${(item + 1) * 2}`);
 
   useEffect(() => {
-    if (window.ethereum) {
-      const fronkWorldClient = getClient();
-      fronkWorldClient
-        .getMintAmountForDay(item + 1)
-        .then((res) => setAmount(res));
+    if (isAuth) {
+      isCorrectChain().then((res) => {
+        if (res) {
+          console.log("res", res);
+          const fronkWorldClient = getClient();
+          fronkWorldClient
+            .getMintAmountForDay(item + 1)
+            .then((res) => setAmount(res));
+        } else {
+          console.log("incorrect chain");
+        }
+      });
     }
-  }, [item]);
+  }, [item, isAuth]);
 
   return (
     <div data-name="card" className="w-32 mx-3">
@@ -79,7 +101,9 @@ const ChainCard = ({
       className={clsx(
         "cursor-pointer relative flex items-end justify-start px-2 pt-1 pb-2"
       )}
-      onClick={() => setActiveChain(chain)}
+      onClick={() => {
+        setActiveChain(chain);
+      }}
       style={{
         background: `url(${
           network.iconUrls[0]
@@ -101,10 +125,8 @@ const ChainCard = ({
 
 const changeNetwork = async ({
   networkName,
-  setError,
 }: {
   networkName: NetworkNameType;
-  setError: any;
 }) => {
   try {
     if (!window.ethereum) throw new Error("No crypto wallet found");
@@ -113,49 +135,53 @@ const changeNetwork = async ({
       params: [{ ...networks[networkName] }],
     });
   } catch (err: any) {
-    setError(err.message);
+    console.log(err.message);
   }
 };
 
-const Popup = ({ setIsOpenModal }: { setIsOpenModal: any }) => {
-  const { t }: { t: any } = useTranslation();
-  const [activeChain, setActiveChain] = useState<NetworkNameType>();
-  const [currentChain, setCurrentChain] = useState<number>();
-  const [error, setError] = useState();
+async function handleNetworkSwitch(
+  networkName: NetworkNameType,
+  setIsOpenModal: any
+) {
   const activeChainId =
-    activeChain && parseInt(networks[activeChain].chainId, 16);
+    networkName && parseInt(networks[networkName].chainId, 16);
+
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const currentChain = await provider.getNetwork().then((chain) => {
+    return chain.chainId;
+  });
+
+  if (currentChain === activeChainId)
+    console.log("the chain is already connected", currentChain);
+  if (currentChain !== activeChainId) {
+    await changeNetwork({ networkName });
+    mint();
+    setIsOpenModal(false);
+    console.log(
+      "connected chain:",
+      parseInt(networks[networkName].chainId, 16)
+    );
+  }
+}
+
+const Popup = ({
+  setIsOpenModal,
+  checkedToday,
+}: {
+  setIsOpenModal: any;
+  checkedToday: boolean;
+}) => {
+  const { t }: { t: any } = useTranslation();
+  const { isAuth } = useAuth();
+  const [activeChain, setActiveChain] = useState<NetworkNameType>();
+  
   function onClose(e: any) {
     if (e.target.getAttribute("data-name") === "overlay") {
       setIsOpenModal(false);
     }
   }
 
-  const handleNetworkSwitch = async (
-    networkName: NetworkNameType | undefined
-  ) => {
-    if (!networkName) return;
-    if (currentChain === activeChainId)
-      console.log("the chain is already connected", currentChain);
-    if (currentChain !== activeChainId) {
-      await changeNetwork({ networkName, setError });
-      console.log(
-        "connected chain:",
-        parseInt(networks[networkName].chainId, 16)
-      );
-      setCurrentChain(parseInt(networks[networkName].chainId, 16));
-    }
-  };
-
-  useEffect(() => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    provider.getNetwork().then((chain) => {
-      setCurrentChain(chain.chainId);
-      // console.log("current chain", chain.chainId);
-    });
-  }, []);
-
-  const claimDisabled = !activeChain || currentChain === activeChainId;
-
+  const claimDisabled = !isAuth || checkedToday || !activeChain;
   return (
     <div
       data-name="overlay"
@@ -172,63 +198,107 @@ const Popup = ({ setIsOpenModal }: { setIsOpenModal: any }) => {
           }}
         >
           <div className="w-full flex justify-end absolute top-0 p-2">
-            <CloseButton handleClick={() => setIsOpenModal(false)} size={16} />
+            <CloseButton handleClick={() => setIsOpenModal(false)} />
           </div>
-          <h1 className="text-5xl uppercase my-9">select chain</h1>
-          <div className="w-full grid md:grid-cols-4 grid-cols-2 gap-y-[30px] gap-x-10">
-            {Object.keys(networks).map((chain) => (
-              <ChainCard
-                key={chain}
-                chain={chain as NetworkNameType}
-                setActiveChain={setActiveChain}
-                active={activeChain === chain}
-              />
-            ))}
-          </div>
-          <button
-            disabled={claimDisabled}
-            className="px-16 font-archivo text-5xl font-light border border-fronk-orange disabled:opacity-60 disabled:hover:bg-transparent hover:bg-fronk-orange uppercase py-2.5 mt-10 mb-5"
-            onClick={() => handleNetworkSwitch(activeChain)}
-          >
-            {t("Claim")}
-          </button>
+          {isAuth ? (
+            <>
+              <h1 className="text-5xl uppercase my-9">select chain</h1>
+              <div className="w-full grid md:grid-cols-4 grid-cols-2 gap-y-[30px] gap-x-10">
+                {Object.keys(networks).map((chain) => (
+                  <ChainCard
+                    key={chain}
+                    chain={chain as NetworkNameType}
+                    setActiveChain={setActiveChain}
+                    active={activeChain === chain}
+                  />
+                ))}
+              </div>
+              <button
+                disabled={claimDisabled}
+                className="px-16 font-archivo text-5xl font-light border border-fronk-orange disabled:opacity-60 disabled:hover:bg-transparent hover:bg-fronk-orange uppercase py-2.5 mt-10 mb-5"
+                onClick={() => {
+                  activeChain &&
+                    handleNetworkSwitch(activeChain, setIsOpenModal);
+                }}
+              >
+                {t("Claim")}
+              </button>
+            </>
+          ) : (
+            <h1>The wallet not connected</h1>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
+async function mint() {
+  // console.log("MINT!");
+  const client = getClient();
+  try {
+    await client.mint();
+  } catch {
+    console.log("error");
+  }
+}
+
 const DailyStreak = () => {
+  const { isAuth, isLoading, setIsLoading } = useAuth();
   const { address } = useAccount();
+
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [checkedToday, setCheckedToday] = useState(false);
-  const [mintStreak, setMintStreak] = useState(2);
+  const [mintStreak, setMintStreak] = useState(0);
+
   const list = Array.from(
     { length: Math.ceil(mintStreak / 7) ? Math.ceil(mintStreak / 7) * 7 : 7 },
     (_, i) => i
   );
 
   const { t }: { t: any } = useTranslation();
-  const mint = async () => {
-    const client = getClient();
-    await client.mint();
-  };
 
   useEffect(() => {
-    if (window.ethereum) {
-      const fronkWorldClient = getClient();
-      fronkWorldClient
-        .checkIfMintedToday(address)
-        .then((checkedToday: boolean) => setCheckedToday(checkedToday));
-      fronkWorldClient
-        .getMintStreak(address)
-        .then((mintStreak: number) => setMintStreak(mintStreak));
+    if (isAuth) {
+      isCorrectChain().then((res) => {
+        if (!!res) {
+          const fronkWorldClient = getClient();
+          fronkWorldClient
+            .checkIfMintedToday(address)
+            .then((checkedToday: boolean) => setCheckedToday(checkedToday));
+          fronkWorldClient
+            .getMintStreak(address)
+            .then((mintStreak: number) => setMintStreak(mintStreak));
+        } else {
+          console.log("incorrect chain");
+        }
+      });
     }
-  }, [address]);
+  }, [address, isAuth]);
+
+  const claimDisabled = !isAuth || checkedToday;
+
+  const handleMint = () => {
+    isCorrectChain().then((res) => {
+      if (!!res) {
+        mint();
+      } else {
+        setIsOpenModal(true);
+      }
+    });
+  };
 
   return (
+    // isLoading ? (
+    //   <div
+    //     data-name="overlay"
+    //     className="fixed backdrop-blur z-30 top-0 right-0 bottom-0 left-0 bg-black/40 flex justify-center items-center lg:px-0"
+    //   >
+    //     <span className="loading loading-spinner loading-lg"></span>
+    //   </div>
+    // ) : (
     <div className="flex flex-col justify-center items-center border-2 border-white/50 px-3.5 py-4">
-      {isOpenModal && <Popup setIsOpenModal={setIsOpenModal} />}
+      {isOpenModal && <Popup setIsOpenModal={setIsOpenModal} checkedToday={checkedToday} />}
       <div className="w-full flex justify-between px-3 mb-4">
         <h1>{t(header)}</h1>
         <button
@@ -248,9 +318,9 @@ const DailyStreak = () => {
         ))}
       </div>
       <button
-        disabled={checkedToday}
+        disabled={claimDisabled}
         className="w-5/12 font-archivo text-5xl font-light border border-fronk-orange disabled:opacity-60 disabled:hover:bg-transparent hover:bg-fronk-orange uppercase py-2.5 mt-10 mb-5"
-        onClick={mint}
+        onClick={handleMint}
       >
         {t("Claim")}
       </button>

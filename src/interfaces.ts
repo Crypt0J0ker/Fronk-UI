@@ -31,7 +31,7 @@ export interface AddEthereumChainParameter {
     symbol: string;
     decimals: number;
   };
-  blockExplorerUrls: string[];
+  blockExplorerUrls?: string[];
 }
 export interface INetWork {
   polygon: AddEthereumChainParameter;

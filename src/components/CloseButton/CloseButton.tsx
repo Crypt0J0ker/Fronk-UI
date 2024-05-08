@@ -3,12 +3,12 @@ import clsx from "clsx";
 
 const CloseButton = ({
   handleClick,
-  size = 16,
+  size = "xl",
 }: {
   handleClick?: any;
-  size?: number;
+  size?: string;
 }) => {
-  const crossSize = `h-${size}`;
+  const crossSize = "sm" ? "h-8" : "h-16";
 
   return (
     <button

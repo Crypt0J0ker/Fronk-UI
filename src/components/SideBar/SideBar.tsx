@@ -75,7 +75,7 @@ const Popup = () => {
 const WalletButton = ({ connectWallet }: { connectWallet: any }) => {
   const { t }: { t: any } = useTranslation();
   const [walletAdress, setWalletAdress] = useState("");
-  const { address, isConnected } = useAccount();
+  const { address } = useAccount();
   const { isAuth } = useAuth();
 
   useEffect(() => {
@@ -86,25 +86,25 @@ const WalletButton = ({ connectWallet }: { connectWallet: any }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuth]);
 
-  if (isConnected) {
+  if (isAuth) {
     return (
       <label
         htmlFor="popup"
         className="bg-fronk-orange hover:bg-fronk-orange/50 text-4xl normal-case font-semibold text-white w-full py-2 my-6 flex justify-center items-center"
       >
-        {walletAdress}
+        <p>{walletAdress}</p>
       </label>
     );
   }
   return (
-    <button
-      className="bg-fronk-orange hover:bg-fronk-orange/50 uppercase text-4xl font-semibold text-white w-full py-2 my-6"
+    <label
+      className="bg-fronk-orange hover:bg-fronk-orange/50 text-4xl normal-case font-semibold text-white w-full py-2 my-6 flex justify-center items-center"
       onClick={() => {
         connectWallet(true);
       }}
     >
-      {t("wallet")}
-    </button>
+      <p className="uppercase">{t("wallet")}</p>
+    </label>
   );
 };
 
@@ -133,18 +133,22 @@ const SideBar = ({
 }) => {
   const { t }: { t: any } = useTranslation();
   const { address } = useAccount();
+  const { isAuth } = useAuth();
 
   const [total, setTotal] = useState("520");
+
   useEffect(() => {
-    if (window.ethereum) {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const fronkWorldClient = new FronkWorldClient(signer);
-      fronkWorldClient
-        .getFronkXPBalance(address)
-        .then((total: string) => setTotal(total));
+    if (isAuth) {
+      // if (window.ethereum) {
+      //   const provider = new ethers.providers.Web3Provider(window.ethereum);
+      //   const signer = provider.getSigner();
+      //   const fronkWorldClient = new FronkWorldClient(signer);
+      //   fronkWorldClient
+      //     .getFronkXPBalance(address)
+      //     .then((total: string) => setTotal(total));
+      // }
     }
-  }, [address]);
+  }, [address, isAuth]);
 
   return (
     <>
@@ -163,7 +167,7 @@ const SideBar = ({
         <div className="flex flex-col mx-3">
           <UserInfoPanel user={user} />
           <WalletButton connectWallet={connectWallet} />
-          <TotalPanel>{total}</TotalPanel>
+          {isAuth && <TotalPanel>{total}</TotalPanel>}
         </div>
 
         <footer className="flex flex-col items-center">
