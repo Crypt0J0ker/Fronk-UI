@@ -1,17 +1,19 @@
-import React from "react";
-import HeroComponent from "../HeroComponent/HeroComponent";
-import BlocksDivider from "../BlocksDivider/BlocksDivider";
-import DailyStreak from "../DailyStreak/DailyStreak";
-import { IUser } from "@/interfaces";
+import React from 'react'
+import HeroComponent from '../HeroComponent/HeroComponent'
+import BlocksDivider from '../BlocksDivider/BlocksDivider'
+import DailyStreak from '../DailyStreak/DailyStreak'
+import Projects from '../Projects/Projects'
 
-const FronkMain = ({ user }: { user: IUser }) => {
+const FronkMain = () => {
   return (
     <div className="uppercase">
       <HeroComponent />
-      <BlocksDivider text={"daily streak"} />
+      <BlocksDivider text={'daily streak'} />
       <DailyStreak />
+      <BlocksDivider text={'projects'} />
+      <Projects />
     </div>
-  );
-};
+  )
+}
 
-export default FronkMain;
+export default FronkMain

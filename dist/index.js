@@ -1,98 +1,102 @@
-import { __awaiter } from "tslib";
-import { Provider } from "@ethersproject/abstract-provider";
-import { Signer } from "@ethersproject/abstract-signer";
-import MultiCall from "@indexed-finance/multicall";
-import { ethers } from "ethers";
-import { DECIMALS, FRONKXP_ADDRESSES, MAX_DAY, RPC_URLS, } from "./constants";
-import { FronkXP__factory } from "./contracts/types";
+import { __awaiter } from 'tslib'
+import { Provider } from '@ethersproject/abstract-provider'
+import { Signer } from '@ethersproject/abstract-signer'
+import MultiCall from '@indexed-finance/multicall'
+import { ethers } from 'ethers'
+import { DECIMALS, FRONKXP_ADDRESSES, MAX_DAY, RPC_URLS } from './constants'
+import { FronkXP__factory } from './contracts/types'
 export class FronkWorldClient {
-    constructor(signerOrProvider) {
-        this.signerOrProvider = signerOrProvider;
-        this.signerOrProvider = signerOrProvider;
-        this.multi = new MultiCall(this.provider);
+  constructor(signerOrProvider) {
+    this.signerOrProvider = signerOrProvider
+    this.signerOrProvider = signerOrProvider
+    this.multi = new MultiCall(this.provider)
+  }
+  static fromUrl(url) {
+    const provider = new ethers.providers.JsonRpcProvider(url)
+    return new this(provider)
+  }
+  static fromChainId(chainId) {
+    const provider = new ethers.providers.JsonRpcProvider(RPC_URLS[chainId])
+    return new this(provider)
+  }
+  get signer() {
+    if (Signer.isSigner(this.signerOrProvider)) {
+      return this.signerOrProvider
     }
-    static fromUrl(url) {
-        const provider = new ethers.providers.JsonRpcProvider(url);
-        return new this(provider);
+    throw new Error('FronkWorld client has no signer')
+  }
+  get provider() {
+    if (Provider.isProvider(this.signerOrProvider)) {
+      return this.signerOrProvider
     }
-    static fromChainId(chainId) {
-        const provider = new ethers.providers.JsonRpcProvider(RPC_URLS[chainId]);
-        return new this(provider);
+    if (!this.signerOrProvider.provider) {
+      throw new Error('FronkWorld client has no provider')
     }
-    get signer() {
-        if (Signer.isSigner(this.signerOrProvider)) {
-            return this.signerOrProvider;
-        }
-        throw new Error("FronkWorld client has no signer");
-    }
-    get provider() {
-        if (Provider.isProvider(this.signerOrProvider)) {
-            return this.signerOrProvider;
-        }
-        if (!this.signerOrProvider.provider) {
-            throw new Error("FronkWorld client has no provider");
-        }
-        return this.signerOrProvider.provider;
-    }
-    getChainId() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { chainId } = yield this.provider.getNetwork();
-            return Number(chainId);
-        });
-    }
-    getContracts(readonly) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const signerOrProvider = readonly ? this.provider : this.signer;
-            const chainId = yield this.getChainId();
-            const fronkXP = FronkXP__factory.connect(FRONKXP_ADDRESSES[chainId], signerOrProvider);
-            return {
-                fronkXP,
-            };
-        });
-    }
-    getFronkXPBalance(userAddress) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { fronkXP } = yield this.getContracts();
-            const userAddr = userAddress || (yield this.signer.getAddress());
-            const balance = yield fronkXP.balanceOf(userAddr);
-            return ethers.utils.formatUnits(balance, DECIMALS);
-        });
-    }
-    checkIfMintedToday(userAddress) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { fronkXP } = yield this.getContracts();
-            const userAddr = userAddress || (yield this.signer.getAddress());
-            const secondsInDay = 60 * 60 * 24;
-            const utcShiftSeconds = Number(yield fronkXP.utcShiftSeconds());
-            const timestamp = Math.floor(Date.now() / 1000);
-            const day = Math.floor((timestamp + utcShiftSeconds) / secondsInDay);
-            return fronkXP.userMintedOnDay(userAddr, day);
-        });
-    }
-    getMintStreak(userAddress) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { fronkXP } = yield this.getContracts();
-            const userAddr = userAddress || (yield this.signer.getAddress());
-            const mintStreak = yield fronkXP.userMintStreak(userAddr);
-            return Number(mintStreak);
-        });
-    }
-    getMintAmountForDay(day) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { fronkXP } = yield this.getContracts();
-            if (day > MAX_DAY) {
-                day = MAX_DAY;
-            }
-            const mintAmount = yield fronkXP.mintAmounts(day - 1);
-            return ethers.utils.formatUnits(mintAmount, DECIMALS);
-        });
-    }
-    mint() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { fronkXP } = yield this.getContracts();
-            const tx = yield fronkXP.mint();
-            yield tx.wait();
-        });
-    }
+    return this.signerOrProvider.provider
+  }
+  getChainId() {
+    return __awaiter(this, void 0, void 0, function* () {
+      const { chainId } = yield this.provider.getNetwork()
+      return Number(chainId)
+    })
+  }
+  getContracts(readonly) {
+    return __awaiter(this, void 0, void 0, function* () {
+      const signerOrProvider = readonly ? this.provider : this.signer
+      const chainId = yield this.getChainId()
+      const fronkXP = FronkXP__factory.connect(
+        FRONKXP_ADDRESSES[chainId],
+        signerOrProvider
+      )
+      return {
+        fronkXP,
+      }
+    })
+  }
+  getFronkXPBalance(userAddress) {
+    return __awaiter(this, void 0, void 0, function* () {
+      const { fronkXP } = yield this.getContracts()
+      const userAddr = userAddress || (yield this.signer.getAddress())
+      const balance = yield fronkXP.balanceOf(userAddr)
+      const formattedBalance = ethers.utils.formatUnits(balance, DECIMALS)
+      return Math.floor(formattedBalance)
+    })
+  }
+  checkIfMintedToday(userAddress) {
+    return __awaiter(this, void 0, void 0, function* () {
+      const { fronkXP } = yield this.getContracts()
+      const userAddr = userAddress || (yield this.signer.getAddress())
+      const secondsInDay = 60 * 60 * 24
+      const utcShiftSeconds = Number(yield fronkXP.utcShiftSeconds())
+      const timestamp = Math.floor(Date.now() / 1000)
+      const day = Math.floor((timestamp + utcShiftSeconds) / secondsInDay)
+      return fronkXP.userMintedOnDay(userAddr, day)
+    })
+  }
+  getMintStreak(userAddress) {
+    return __awaiter(this, void 0, void 0, function* () {
+      const { fronkXP } = yield this.getContracts()
+      const userAddr = userAddress || (yield this.signer.getAddress())
+      const mintStreak = yield fronkXP.userMintStreak(userAddr)
+      return Number(mintStreak)
+    })
+  }
+  getMintAmountForDay(day) {
+    return __awaiter(this, void 0, void 0, function* () {
+      const { fronkXP } = yield this.getContracts()
+      if (day > MAX_DAY) {
+        day = MAX_DAY
+      }
+      const mintAmount = yield fronkXP.mintAmounts(day - 1)
+      return ethers.utils.formatUnits(mintAmount, DECIMALS)
+    })
+  }
+  mint() {
+    return __awaiter(this, void 0, void 0, function* () {
+      const { fronkXP } = yield this.getContracts()
+      const tx = yield fronkXP.mint()
+      yield tx.wait()
+    })
+  }
 }
 //# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi9zcmMvaW5kZXgudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUFBLE9BQU8sRUFBRSxRQUFRLEVBQUUsTUFBTSxrQ0FBa0MsQ0FBQztBQUM1RCxPQUFPLEVBQUUsTUFBTSxFQUFFLE1BQU0sZ0NBQWdDLENBQUM7QUFDeEQsT0FBTyxTQUFTLE1BQU0sNEJBQTRCLENBQUM7QUFDbkQsT0FBTyxFQUFFLE1BQU0sRUFBRSxNQUFNLFFBQVEsQ0FBQztBQUNoQyxPQUFPLEVBRUwsUUFBUSxFQUNSLGlCQUFpQixFQUNqQixPQUFPLEVBQ1AsUUFBUSxHQUNULE1BQU0sYUFBYSxDQUFDO0FBQ3JCLE9BQU8sRUFBRSxnQkFBZ0IsRUFBRSxNQUFNLG1CQUFtQixDQUFDO0FBR3JELE1BQU0sT0FBTyxnQkFBZ0I7SUFhM0IsWUFBNkIsZ0JBQW1DO1FBQW5DLHFCQUFnQixHQUFoQixnQkFBZ0IsQ0FBbUI7UUFDOUQsSUFBSSxDQUFDLGdCQUFnQixHQUFHLGdCQUFnQixDQUFDO1FBQ3pDLElBQUksQ0FBQyxLQUFLLEdBQUcsSUFBSSxTQUFTLENBQUMsSUFBSSxDQUFDLFFBQVEsQ0FBQyxDQUFDO0lBQzVDLENBQUM7SUFiTSxNQUFNLENBQUMsT0FBTyxDQUFDLEdBQVc7UUFDL0IsTUFBTSxRQUFRLEdBQUcsSUFBSSxNQUFNLENBQUMsU0FBUyxDQUFDLGVBQWUsQ0FBQyxHQUFHLENBQUMsQ0FBQztRQUMzRCxPQUFPLElBQUksSUFBSSxDQUFDLFFBQVEsQ0FBQyxDQUFDO0lBQzVCLENBQUM7SUFFTSxNQUFNLENBQUMsV0FBVyxDQUFDLE9BQWdCO1FBQ3hDLE1BQU0sUUFBUSxHQUFHLElBQUksTUFBTSxDQUFDLFNBQVMsQ0FBQyxlQUFlLENBQUMsUUFBUSxDQUFDLE9BQU8sQ0FBQyxDQUFDLENBQUM7UUFDekUsT0FBTyxJQUFJLElBQUksQ0FBQyxRQUFRLENBQUMsQ0FBQztJQUM1QixDQUFDO0lBT0QsSUFB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QUMsTUFBTSxJQUFJLENBQUMsTUFBTSxDQUFDLFVBQVUsRUFBRSxDQUFDLENBQUM7WUFFakUsTUFBTSxVQUFVLEdBQUcsTUFBTSxPQUFPLENBQUMsY0FBYyxDQUFDLFFBQVEsQ0FBQyxDQUFDO1lBRTFELE9BQU8sTUFBTSxDQUFDLFVBQVUsQ0FBQyxDQUFDO1FBQzVCLENBQUM7S0FBQTtJQUVZLG1CQUFtQixDQUFDLEdBQVc7O1lBQzFDLE1BQU0sRUFBRSxPQUFPLEVBQUUsR0FBRyxNQUFNLElBQUksQ0FBQyxZQUFZLEVBQUUsQ0FBQztZQUM5QyxJQUFJLEdBQUcsR0FBRyxPQUFPLEVBQUU7Z0JBQ2pCLEdBQUcsR0FBRyxPQUFPLENBQUM7YUFDZjtZQUVELE1BQU0sVUFBVSxHQUFHLE1BQU0sT0FBTyxDQUFDLFdBQVcsQ0FBQyxHQUFHLEdBQUcsQ0FBQyxDQUFDLENBQUM7WUFFdEQsT0FBTyxNQUFNLENBQUMsS0FBSyxDQUFDLFdBQVcsQ0FBQyxVQUFVLEVBQUUsUUFBUSxDQUFDLENBQUM7UUFDeEQsQ0FBQztLQUFBO0lBRVksSUFBSTs7WUFDZixNQUFNLEVBQUUsT0FBTyxFQUFFLEdBQUcsTUFBTSxJQUFJLENBQUMsWUFBWSxFQUFFLENBQUM7WUFFOUMsTUFBTSxFQUFFLEdBQUcsTUFBTSxPQUFPLENBQUMsSUFBSSxFQUFFLENBQUM7WUFDaEMsTUFBTSxFQUFFLENBQUMsSUFBSSxFQUFFLENBQUM7UUFDbEIsQ0FBQztLQUFBO0NBQ0YiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBQcm92aWRlciB9IGZyb20gXCJAZXRoZXJzcHJvamVjdC9hYnN0cmFjdC1wcm92aWRlclwiO1xuaW1wb3J0IHsgU2lnbmVyIH0gZnJvbSBcIkBldGhlcnNwcm9qZWN0L2Fic3RyYWN0LXNpZ25lclwiO1xuaW1wb3J0IE11bHRpQ2FsbCBmcm9tIFwiQGluZGV4ZWQtZmluYW5jZS9tdWx0aWNhbGxcIjtcbmltcG9ydCB7IGV0aGVycyB9IGZyb20gXCJldGhlcnNcIjtcbmltcG9ydCB7XG4gIENoYWluSWQsXG4gIERFQ0lNQUxTLFxuICBGUk9OS1hQX0FERFJFU1NFUyxcbiAgTUFYX0RBWSxcbiAgUlBDX1VSTFMsXG59IGZyb20gXCIuL2NvbnN0YW50c1wiO1xuaW1wb3J0IHsgRnJvbmtYUF9fZmFjdG9yeSB9IGZyb20gXCIuL2NvbnRyYWN0cy90eXBlc1wiO1xuaW1wb3J0IHsgQ29udHJhY3RzIH0gZnJvbSBcIi4vdHlwZXNcIjtcblxuZXhwb3J0IGNsYXNzIEZyb25rV29ybGRDbGllbnQge1xuICBwcml2YXRlIHJlYWRvbmx5IG11bHRpOiBNdWx0aUNhbGw7XG5cbiAgcHVibGljIHN0YXRpYyBmcm9tVXJsKHVybDogc3RyaW5nKTogRnJvbmtXb3JsZENsaWVudCB7XG4gICAgY29uc3QgcHJvdmlkZXIgPSBuZXcgZXRoZXJzLnByb3ZpZGVycy5Kc29uUnBjUHJvdmlkZXIodXJsKTtcbiAgICByZXR1cm4gbmV3IHRoaXMocHJvdmlkZXIpO1xuICB9XG5cbiAgcHVibGljIHN0YXRpYyBmcm9tQ2hhaW5JZChjaGFpbklkOiBDaGFpbklkKTogRnJvbmtXb3JsZENsaWVudCB7XG4gICAgY29uc3QgcHJvdmlkZXIgPSBuZXcgZXRoZXJzLnByb3ZpZGVycy5Kc29uUnBjUHJvdmlkZXIoUlBDX1VSTFNbY2hhaW5JZF0pO1xuICAgIHJldHVybiBuZXcgdGhpcyhwcm92aWRlcik7XG4gIH1cblxuICBjb25zdHJ1Y3Rvcihwcml2YXRlIHJlYWRvbmx5IHNpZ25lck9yUHJvdmlkZXI6IFNpZ25lciB8IFByb3ZpZGVyKSB7XG4gICAgdGhpcy5zaWduZXJPclByb3ZpZGVyID0gc2lnbmVyT3JQcm92aWRlcjtcbiAgICB0aGlzLm11bHRpID0gbmV3IE11bHRpQ2FsbCh0aGlzLnByb3ZpZGVyKTtcbiAgfVxuXG4gIHB1YmxpYyBnZXQgc2lnbmVyKCk6IFNpZ25lciB7XG4gICAgaWYgKFNpZ25lci5pc1NpZ25lcih0aGlzLnNpZ25lck9yUHJvdmlkZXIpKSB7XG4gICAgICByZXR1cm4gdGhpcy5zaWduZXJPclByb3ZpZGVyO1xuICAgIH1cblxuICAgIHRocm93IG5ldyBFcnJvcihcIkZyb25rV29ybGQgY2xpZW50IGhhcyBubyBzaWduZXJcIik7XG4gIH1cblxuICBwdWJsaWMgZ2V0IHByb3ZpZGVyKCk6IFByb3ZpZGVyIHtcbiAgICBpZiAoUHJvdmlkZXIuaXNQcm92aWRlcih0aGlzLnNpZ25lck9yUHJvdmlkZXIpKSB7XG4gICAgICByZXR1cm4gdGhpcy5zaWduZXJPclByb3ZpZGVyO1xuICAgIH1cbiAgICBpZiAoIXRoaXMuc2lnbmVyT3JQcm92aWRlci5wcm92aWRlcikge1xuICAgICAgdGhyb3cgbmV3IEVycm9yKFwiRnJvbmtXb3JsZCBjbGllbnQgaGFzIG5vIHByb3ZpZGVyXCIpO1xuICAgIH1cblxuICAgIHJldHVybiB0aGlzLnNpZ25lck9yUHJvdmlkZXIucHJvdmlkZXI7XG4gIH1cblxuICBwcm90ZWN0ZWQgYXN5bmMgZ2V0Q2hhaW5JZCgpOiBQcm9taXNlPENoYWluSWQ+IHtcbiAgICBjb25zdCB7IGNoYWluSWQgfSA9IGF3YWl0IHRoaXMucHJvdmlkZXIuZ2V0TmV0d29yaygpO1xuICAgIHJldHVybiBOdW1iZXIoY2hhaW5JZCk7XG4gIH1cblxuICBwcm90ZWN0ZWQgYXN5bmMgZ2V0Q29udHJhY3RzKHJlYWRvbmx5PzogYm9vbGVhbik6IFByb21pc2U8Q29udHJhY3RzPiB7XG4gICAgY29uc3Qgc2lnbmVyT3JQcm92aWRlciA9IHJlYWRvbmx5ID8gdGhpcy5wcm92aWRlciA6IHRoaXMuc2lnbmVyO1xuXG4gICAgY29uc3QgY2hhaW5JZCA9IGF3YWl0IHRoaXMuZ2V0Q2hhaW5JZCgpO1xuICAgIGNvbnN0IGZyb25rWFAgPSBGcm9ua1hQX19mYWN0b3J5LmNvbm5lY3QoXG4gICAgICBGUk9OS1hQX0FERFJFU1NFU1tjaGFpbklkXSxcbiAgICAgIHNpZ25lck9yUHJvdmlkZXJcbiAgICApO1xuXG4gICAgcmV0dXJuIHtcbiAgICAgIGZyb25rWFAsXG4gICAgfTtcbiAgfVxuXG4gIHB1YmxpYyBhc3luYyBnZXRGcm9ua1hQQmFsYW5jZSh1c2VyQWRkcmVzcz86IHN0cmluZyk6IFByb21pc2U8c3RyaW5nPiB7XG4gICAgY29uc3QgeyBmcm9ua1hQIH0gPSBhd2FpdCB0aGlzLmdldENvbnRyYWN0cygpO1xuICAgIGNvbnN0IHVzZXJBZGRyID0gdXNlckFkZHJlc3MgfHwgKGF3YWl0IHRoaXMuc2lnbmVyLmdldEFkZHJlc3MoKSk7XG5cbiAgICBjb25zdCBiYWxhbmNlID0gYXdhaXQgZnJvbmtYUC5iYWxhbmNlT2YodXNlckFkZHIpO1xuXG4gICAgcmV0dXJuIGV0aGVycy51dGlscy5mb3JtYXRVbml0cyhiYWxhbmNlLCBERUNJTUFMUyk7XG4gIH1cblxuICBwdWJsaWMgYXN5bmMgY2hlY2tJZk1pbnRlZFRvZGF5KHVzZXJBZGRyZXNzPzogc3RyaW5nKTogUHJvbWlzZTxib29sZWFuPiB7XG4gICAgY29uc3QgeyBmcm9ua1hQIH0gPSBhd2FpdCB0aGlzLmdldENvbnRyYWN0cygpO1xuICAgIGNvbnN0IHVzZXJBZGRyID0gdXNlckFkZHJlc3MgfHwgKGF3YWl0IHRoaXMuc2lnbmVyLmdldEFkZHJlc3MoKSk7XG5cbiAgICBjb25zdCBzZWNvbmRzSW5EYXkgPSA2MCAqIDYwICogMjQ7XG4gICAgY29uc3QgdXRjU2hpZnRTZWNvbmRzID0gTnVtYmVyKGF3YWl0IGZyb25rWFAudXRjU2hpZnRTZWNvbmRzKCkpO1xuICAgIGNvbnN0IHRpbWVzdGFtcCA9IE1hdGguZmxvb3IoRGF0ZS5ub3coKSAvIDEwMDApO1xuICAgIGNvbnN0IGRheSA9IE1hdGguZmxvb3IoKHRpbWVzdGFtcCArIHV0Y1NoaWZ0U2Vjb25kcykgLyBzZWNvbmRzSW5EYXkpO1xuXG4gICAgcmV0dXJuIGZyb25rWFAudXNlck1pbnRlZE9uRGF5KHVzZXJBZGRyLCBkYXkpO1xuICB9XG5cbiAgcHVibGljIGFzeW5jIGdldE1pbnRTdHJlYWsodXNlckFkZHJlc3M/OiBzdHJpbmcpOiBQcm9taXNlPG51bWJlcj4ge1xuICAgIGNvbnN0IHsgZnJvbmtYUCB9ID0gYXdhaXQgdGhpcy5nZXRDb250cmFjdHMoKTtcbiAgICBjb25zdCB1c2VyQWRkciA9IHVzZXJBZGRyZXNzIHx8IChhd2FpdCB0aGlzLnNpZ25lci5nZXRBZGRyZXNzKCkpO1xuXG4gICAgY29uc3QgbWludFN0cmVhayA9IGF3YWl0IGZyb25rWFAudXNlck1pbnRTdHJlYWsodXNlckFkZHIpO1xuXG4gICAgcmV0dXJuIE51bWJlcihtaW50U3RyZWFrKTtcbiAgfVxuXG4gIHB1YmxpYyBhc3luYyBnZXRNaW50QW1vdW50Rm9yRGF5KGRheTogbnVtYmVyKTogUHJvbWlzZTxzdHJpbmc+IHtcbiAgICBjb25zdCB7IGZyb25rWFAgfSA9IGF3YWl0IHRoaXMuZ2V0Q29udHJhY3RzKCk7XG4gICAgaWYgKGRheSA+IE1BWF9EQVkpIHtcbiAgICAgIGRheSA9IE1BWF9EQVk7XG4gICAgfVxuXG4gICAgY29uc3QgbWludEFtb3VudCA9IGF3YWl0IGZyb25rWFAubWludEFtb3VudHMoZGF5IC0gMSk7XG5cbiAgICByZXR1cm4gZXRoZXJzLnV0aWxzLmZvcm1hdFVuaXRzKG1pbnRBbW91bnQsIERFQ0lNQUxTKTtcbiAgfVxuXG4gIHB1YmxpYyBhc3luYyBtaW50KCk6IFByb21pc2U8dm9pZD4ge1xuICAgIGNvbnN0IHsgZnJvbmtYUCB9ID0gYXdhaXQgdGhpcy5nZXRDb250cmFjdHMoKTtcblxuICAgIGNvbnN0IHR4ID0gYXdhaXQgZnJvbmtYUC5taW50KCk7XG4gICAgYXdhaXQgdHgud2FpdCgpO1xuICB9XG59XG4iXX0=

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import { ethers } from 'ethers'
 import Image from 'next/image'
 import imgSrcLogo from '../../../public/images/fronk/Logo_small.png'
 import imgSrcAvatar from '../../../public/images/fronk/Avatar.png'
@@ -11,12 +10,12 @@ import { useAuth } from '@/hook/useAuth'
 import { useTranslation } from 'react-i18next'
 import Link from 'next/link'
 import { IUser } from '@/interfaces'
-import { FronkWorldClient } from '../../../dist'
+import { getClient, isCorrectChain } from '@/client'
 
 const socials = [
-  { icon: <TwitterIcon />, label: 'twitter', link: '#' },
-  { icon: <InstagramIcon />, label: 'instagram', link: '#' },
-  { icon: <DiscordIcon />, label: 'discord', link: '#' },
+  { icon: <TwitterIcon />, label: 'twitter', path: '#' },
+  { icon: <InstagramIcon />, label: 'instagram', path: '#' },
+  { icon: <DiscordIcon />, label: 'discord', path: '#' },
 ]
 
 const UserInfoPanel = ({ user }: { user: IUser }) => (
@@ -27,7 +26,7 @@ const UserInfoPanel = ({ user }: { user: IUser }) => (
     <h1 className="mt-2.5 text-2xl">{user.name}</h1>
     <div className="w-full px-2.5">
       {user.socials.map(item => (
-        <Link key={item.label} href={item.link}>
+        <Link key={item.label} href={item.path}>
           <div className="flex justify-between items-center border border-fronk-orange mt-5 pr-5 py-2">
             <h1 className="ml-2.5 text-base">{item.name}</h1>
             <div className="flex w-1/6 justify-center items-center">
@@ -124,7 +123,7 @@ const TotalPanel = ({ children }: { children: number | string }) => {
   )
 }
 
-const SideBar = ({
+const Sidebar = ({
   user,
   connectWallet,
 }: {
@@ -135,24 +134,21 @@ const SideBar = ({
   const { address } = useAccount()
   const { isAuth } = useAuth()
 
-  const [total, setTotal] = useState('0.0')
+  const [total, setTotal] = useState('0')
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (isAuth) {
-        if (window.ethereum) {
-          const provider = new ethers.providers.Web3Provider(window.ethereum)
-          const signer = provider.getSigner()
-          const address = await signer.getAddress()
-          const fronkWorldClient = new FronkWorldClient(signer)
+    if (isAuth) {
+      isCorrectChain().then(res => {
+        if (!!res) {
+          const fronkWorldClient = getClient()
           fronkWorldClient
-            .getFronkXPBalance(address.toString())
+            .getFronkXPBalance(address)
             .then((total: string) => setTotal(total))
-            .catch((err: any) => console.log(err))
+        } else {
+          console.log('incorrect chain')
         }
-      }
+      })
     }
-    fetchData()
   }, [address, isAuth])
 
   return (
@@ -180,8 +176,8 @@ const SideBar = ({
             {t('all rights reserved')}
           </h1>
           <div className="w-full flex justify-center items-center mb-12">
-            {socials.map(({ icon, label, link }) => (
-              <Link key={label} href={link} className="mx-4">
+            {socials.map(({ icon, label, path }) => (
+              <Link key={label} href={path} className="mx-4">
                 {icon}
               </Link>
             ))}
@@ -192,4 +188,4 @@ const SideBar = ({
   )
 }
 
-export default SideBar
+export default Sidebar

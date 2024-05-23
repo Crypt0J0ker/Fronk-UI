@@ -1,54 +1,48 @@
 export interface IDictionary {
-  [index: string]: string;
+  [index: string]: string
 }
 
 export type SocialType = {
-  label: string;
-  name: string;
-  link: string;
-  icon: any;
-};
-export interface IUser {
-  name: string;
-  socials: SocialType[];
-  dailyStreak: DailyStreakType[];
+  label: string
+  name: string
+  path: string
+  icon?: any
 }
-export type DailyStreakType = {
-  id: number;
-  value: number;
-  checked: boolean;
-};
+export interface IUser {
+  name: string
+  socials: SocialType[]
+}
 
-export type DirectionType = "right" | "left" | "up" | "down";
+export type DirectionType = 'right' | 'left' | 'up' | 'down'
 
 export interface AddEthereumChainParameter {
-  chainId: string;
-  chainName: string;
-  rpcUrls: string[];
-  iconUrls: string[];
+  chainId: string
+  chainName: string
+  rpcUrls: string[]
+  iconUrls: string[]
   nativeCurrency: {
-    name: string;
-    symbol: string;
-    decimals: number;
-  };
-  blockExplorerUrls?: string[];
+    name: string
+    symbol: string
+    decimals: number
+  }
+  blockExplorerUrls?: string[]
 }
 export interface INetWork {
-  polygon: AddEthereumChainParameter;
-  arbitrum_one: AddEthereumChainParameter;
-  arbitrum_nova: AddEthereumChainParameter;
-  blast: AddEthereumChainParameter;
-  base: AddEthereumChainParameter;
-  linea: AddEthereumChainParameter;
-  scroll: AddEthereumChainParameter;
-  zksync: AddEthereumChainParameter;
+  polygon: AddEthereumChainParameter
+  arbitrum_one: AddEthereumChainParameter
+  arbitrum_nova: AddEthereumChainParameter
+  blast: AddEthereumChainParameter
+  base: AddEthereumChainParameter
+  linea: AddEthereumChainParameter
+  scroll: AddEthereumChainParameter
+  zksync: AddEthereumChainParameter
 }
 export type NetworkNameType =
-  | "polygon"
-  | "arbitrum_one"
-  | "arbitrum_nova"
-  | "blast"
-  | "base"
-  | "linea"
-  | "scroll"
-  | "zksync";
+  | 'polygon'
+  | 'arbitrum_one'
+  | 'arbitrum_nova'
+  | 'blast'
+  | 'base'
+  | 'linea'
+  | 'scroll'
+  | 'zksync'
