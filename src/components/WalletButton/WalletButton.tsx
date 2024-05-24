@@ -25,7 +25,7 @@ const WalletButton = ({
 
   const buttonClass = isSidebar
     ? 'bg-fronk-orange hover:bg-fronk-orange/50 text-4xl normal-case font-semibold text-white w-full py-2 my-6 flex justify-center items-center'
-    : 'bg-fronk-black hover:bg-fronk-orange/50 text-4xl normal-case font-semibold text-fronk-orange w-full py-2 my-6 flex justify-center items-center max-w-md border border-fronk-orange absolute bottom-0 left-14'
+    : 'bg-fronk-black hover:bg-fronk-orange/50 text-4xl normal-case font-semibold text-white text-opacity-90 w-full py-2 my-6 flex justify-center items-center max-w-md border border-fronk-orange absolute bottom-0 left-14'
 
   if (isAuth) {
     return (
