@@ -17,7 +17,9 @@ const Popup = () => {
       <input type="checkbox" id="popup" className="modal-toggle" />
       <div className="modal" role="dialog">
         <div className="modal-box text-black">
-          <p className="py-4">{t('Are you sure you want to disconnect?')}</p>
+          <p className="py-4 text-gray-300">
+            {t('Are you sure you want to disconnect?')}
+          </p>
           <div className="modal-action">
             <label htmlFor="popup" className="btn">
               {t('cancel')}

@@ -88,7 +88,15 @@ const ProjectItemPage = () => {
   const [isOpenConnectWallet, setIsOpenConnectWallet] = useState(false)
 
   return (
-    <>
+    <div
+      className={`text-white ${
+        isOpenConnectWallet ? 'fixed' : 'relative'
+      } bg-fronk-dark flex w-full overflow-x-hidden`}
+      style={{
+        background:
+          'radial-gradient(circle closest-corner at 90% 60%, rgba(227, 113, 8, 0.1) 30%, rgba(12, 12, 12, 1) 100%), linear-gradient(to right, rgba(12, 12, 12, 1), rgba(12, 12, 12, 1))',
+      }}
+    >
       <Popup />
       <ScreenLayout socials={project.socials}>
         <ProjectComponent data={project} />
@@ -98,7 +106,7 @@ const ProjectItemPage = () => {
         isOpenConnectWallet={isOpenConnectWallet}
         setIsOpenConnectWallet={setIsOpenConnectWallet}
       />
-    </>
+    </div>
   )
 }
 
