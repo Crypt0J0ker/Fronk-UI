@@ -5,12 +5,14 @@ import imgSrcAvatar from '../../../public/images/fronk/Avatar.png'
 import DiscordIcon from '@/components/icons/discordIcon'
 import TwitterIcon from '@/components/icons/twitterIcon'
 import InstagramIcon from '@/components/icons/instagramIcon'
-import { useAccount, useDisconnect } from 'wagmi'
+import { useAccount } from 'wagmi'
 import { useAuth } from '@/hook/useAuth'
 import { useTranslation } from 'react-i18next'
 import Link from 'next/link'
 import { IUser } from '@/interfaces'
 import { getClient, isCorrectChain } from '@/client'
+import WalletButton from '../WalletButton/WalletButton'
+import Popup from '../DisconnectPopup/DisconnectPopup'
 
 const socials = [
   { icon: <TwitterIcon />, label: 'twitter', path: '#' },
@@ -38,74 +40,6 @@ const UserInfoPanel = ({ user }: { user: IUser }) => (
     </div>
   </div>
 )
-
-const Popup = () => {
-  const { t }: { t: any } = useTranslation()
-  const { disconnect } = useDisconnect()
-  const { setIsLoading, setIsOpenSidebar } = useAuth()
-
-  function handleDisconnect() {
-    setIsLoading(true)
-    disconnect()
-    setIsOpenSidebar(false)
-  }
-  return (
-    <>
-      <input type="checkbox" id="popup" className="modal-toggle" />
-      <div className="modal" role="dialog">
-        <div className="modal-box text-black">
-          <p className="py-4">{t('Are you sure you want to disconnect?')}</p>
-          <div className="modal-action">
-            <label htmlFor="popup" className="btn">
-              {t('cancel')}
-            </label>
-            <label htmlFor="popup" onClick={handleDisconnect} className="btn">
-              {t('disconnect')}
-            </label>
-          </div>
-        </div>
-
-        <label className="modal-backdrop" htmlFor="popup"></label>
-      </div>
-    </>
-  )
-}
-
-const WalletButton = ({ connectWallet }: { connectWallet: any }) => {
-  const { t }: { t: any } = useTranslation()
-  const [walletAdress, setWalletAdress] = useState('')
-  const { address } = useAccount()
-  const { isAuth } = useAuth()
-
-  useEffect(() => {
-    if (address) {
-      const value = `${address.slice(0, 5)}...${address?.slice(-4)}`
-      setWalletAdress(value)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuth])
-
-  if (isAuth) {
-    return (
-      <label
-        htmlFor="popup"
-        className="bg-fronk-orange hover:bg-fronk-orange/50 text-4xl normal-case font-semibold text-white w-full py-2 my-6 flex justify-center items-center"
-      >
-        <p>{walletAdress}</p>
-      </label>
-    )
-  }
-  return (
-    <label
-      className="bg-fronk-orange hover:bg-fronk-orange/50 text-4xl normal-case font-semibold text-white w-full py-2 my-6 flex justify-center items-center"
-      onClick={() => {
-        connectWallet(true)
-      }}
-    >
-      <p className="uppercase">{t('wallet')}</p>
-    </label>
-  )
-}
 
 const TotalPanel = ({ children }: { children: number | string }) => {
   const { t }: { t: any } = useTranslation()

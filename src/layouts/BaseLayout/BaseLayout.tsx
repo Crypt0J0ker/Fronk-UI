@@ -1,18 +1,18 @@
-import React, { useState } from "react";
-import ConnectWalletComponent from "@/components/ConnectWalletComponent/ConnectWalletComponent";
-import SideBar from "@/components/SideBar/SideBar";
+import React, { useState } from 'react'
+import ConnectWalletComponent from '@/components/ConnectWalletComponent/ConnectWalletComponent'
+import SideBar from '@/components/SideBar/SideBar'
 
 const BaseLayout = (props: any) => {
-  const [isOpenConnectWallet, setIsOpenConnectWallet] = useState(false);
+  const [isOpenConnectWallet, setIsOpenConnectWallet] = useState(false)
 
   return (
     <div
       className={`text-white ${
-        isOpenConnectWallet ? "fixed" : "relative"
+        isOpenConnectWallet ? 'fixed' : 'relative'
       } bg-fronk-dark flex w-full overflow-x-hidden`}
       style={{
         background:
-          "radial-gradient(circle closest-corner at 90% 60%, rgba(227, 113, 8, 0.1) 30%, rgba(12, 12, 12, 1) 100%), linear-gradient(to right, rgba(12, 12, 12, 1), rgba(12, 12, 12, 1))",
+          'radial-gradient(circle closest-corner at 90% 60%, rgba(227, 113, 8, 0.1) 30%, rgba(12, 12, 12, 1) 100%), linear-gradient(to right, rgba(12, 12, 12, 1), rgba(12, 12, 12, 1))',
       }}
     >
       <SideBar user={props.user} connectWallet={setIsOpenConnectWallet} />
@@ -27,7 +27,7 @@ const BaseLayout = (props: any) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default BaseLayout;
+export default BaseLayout
